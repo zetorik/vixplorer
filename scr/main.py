@@ -46,10 +46,10 @@ class Explorer:
                         clean()
                         break
                     case "j":
-                        self.selected_index = max(self.selected_index + 1, len(self.files))
+                        self.selected_index = min(self.selected_index + 1, len(self.files) -1)
                         self.update()
                     case "k":
-                        self.selected_index = min(self.selected_index -1, 0)
+                        self.selected_index = max(self.selected_index -1, 0)
                         self.update()
 
                 if c == "q":
