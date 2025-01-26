@@ -48,7 +48,7 @@ class Explorer:
                 self.selected_file = abs_file 
                 self.is_dir_selected = os.path.isdir(abs_file)
 
-                print(Back.WHITE + file + Style.RESET_ALL)
+                print(Back.WHITE + Fore.BLACK + file + Style.RESET_ALL)
                 continue
             
             print(file)
@@ -72,6 +72,8 @@ class Explorer:
                 os.remove(self.selected_file)
 
             self.update()
+
+    # TODO: make new delete method that can delete from selected to start or to end
 
     def single_open_selected(self):
         if self.is_dir_selected:
@@ -169,6 +171,9 @@ class Explorer:
                     self.motion_mult = 0 - self.selected_index
                 case "G":
                     self.motion_mult = len(self.files) - 1 - self.selected_index
+
+                    if operator == "d":
+                        self.motion_mult += 1
                 case "j":
                     pass
                 case "k":
