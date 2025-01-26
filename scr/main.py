@@ -20,6 +20,8 @@ class Explorer:
         self.selected_file = None
         self.is_dir_selected = False
         self.files = []
+        
+        self.motion_add = 0
 
         self.update()
 
@@ -83,34 +85,44 @@ class Explorer:
         self.selected_index = 0
         self.update()
     
+    def input(self, c:str):
+         match c:
+            case "j":
+                self.move_focus_down()
+            case "k":
+                self.move_focus_up()
+            case "d":
+                if not self.selected_file:
+                    return
+
+                self.delete_selected()
+            case " ":
+                if not self.selected_file:
+                    return
+
+                self.open_selected()
+            case "-":
+                self.dir_up()
+                    
+
     def main_loop(self):
         while True:
-            if self.kb.kbhit():
-                c = self.kb.getch()
-                c_ord = ord(c)
-                #print(c, c_ord)
+            if not self.kb.kbhit():
+                continue
 
-                match c:
-                    case "q":
-                        clean()
-                        break
-                    case "j":
-                        self.move_focus_down()
-                    case "k":
-                        self.move_focus_up()
-                    case "d":
-                        if not self.selected_file:
-                            continue
+            c = self.kb.getch()
+            c_ord = ord(c)
 
-                        self.delete_selected()
-                    case " ":
-                        if not self.selected_file:
-                            continue
+            if c == "q":
+                clean()
+                break
 
-                        self.open_selected()
-                    case "-":
-                        self.dir_up()
-
+            if c.isdigit():
+                self.motion_add += int(c)
+            else:
+                self.input(c)
+                self.motion_add = 0
+                   
         self.kb.set_normal_term()
 
 if __name__ == "__main__":
