@@ -34,6 +34,14 @@ class Explorer:
                 continue
             
             print(file)
+    
+    def move_focus_down(self):
+        self.selected_index = min(self.selected_index + 1, len(self.files) -1)
+        self.update()
+
+    def move_focus_up(self):
+        self.selected_index = max(self.selected_index - 1, 0)
+        self.update()
 
     def main_loop(self):
         while True:
@@ -46,11 +54,9 @@ class Explorer:
                         clean()
                         break
                     case "j":
-                        self.selected_index = min(self.selected_index + 1, len(self.files) -1)
-                        self.update()
+                        self.move_focus_down()
                     case "k":
-                        self.selected_index = max(self.selected_index -1, 0)
-                        self.update()
+                        self.move_focus_up()
 
                 if c == "q":
                     clean()
