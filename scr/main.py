@@ -12,15 +12,26 @@ def clean():
 class Explorer:
     def __init__(self):
         self.kb = KBHit()
-       
+        
+        self.selected_index = 0
+        self.selected_file = None
+        self.is_dir_selected = False
+        self.files = []
+
         self.update()
 
         self.main_loop()
 
     def update(self):
-        clean()        
+        clean() 
 
-        for file in os.listdir():
+        self.files = os.listdir()
+
+        for i, file in enumerate(self.files):
+            if i == self.selected_index:
+                print(Back.WHITE + file + Style.RESET_ALL)
+                continue
+            
             print(file)
 
     def main_loop(self):
