@@ -1,1 +1,1 @@
-Cursed explorer made using vim / nvim
+Cursed explorer made using vim motions
