@@ -3,7 +3,7 @@ from colorama import Back, Fore, Style
 
 from kbhit import KBHit
 
-import os
+import os, shutil
 import sys
 import time
 
@@ -30,6 +30,7 @@ class Explorer:
 
         for i, file in enumerate(self.files):
             if i == self.selected_index:
+                self.selected_file = file
                 print(Back.WHITE + file + Style.RESET_ALL)
                 continue
             
@@ -41,6 +42,14 @@ class Explorer:
 
     def move_focus_up(self):
         self.selected_index = max(self.selected_index - 1, 0)
+        self.update()
+
+    def delete_selected(self):
+        if self.is_dir_selected:
+            shutil.rmtree(self.selected_file)
+        else:
+            os.remove(self.selected_file)
+
         self.update()
 
     def main_loop(self):
@@ -57,6 +66,8 @@ class Explorer:
                         self.move_focus_down()
                     case "k":
                         self.move_focus_up()
+                    case "d":
+                        self.delete_selected()
 
                 if c == "q":
                     clean()
