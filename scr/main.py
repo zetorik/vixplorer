@@ -21,7 +21,9 @@ class Explorer:
         self.is_dir_selected = False
         self.files = []
         
-        self.motion_add = 0
+        self.motion_mult = 1
+
+        self.input_buffer = ""
 
         self.update()
 
@@ -46,11 +48,11 @@ class Explorer:
             print(file)
     
     def move_focus_down(self):
-        self.selected_index = min(self.selected_index + 1, len(self.files) -1)
+        self.selected_index = min(self.selected_index + self.motion_mult, len(self.files) -1)
         self.update()
 
     def move_focus_up(self):
-        self.selected_index = max(self.selected_index - 1, 0)
+        self.selected_index = max(self.selected_index - self.motion_mult, 0)
         self.update()
 
     def delete_selected(self):
@@ -84,26 +86,58 @@ class Explorer:
 
         self.selected_index = 0
         self.update()
-    
-    def input(self, c:str):
-         match c:
+
+    def single_input(self, c: str) -> bool:
+        match c:
             case "j":
                 self.move_focus_down()
             case "k":
                 self.move_focus_up()
             case "d":
                 if not self.selected_file:
-                    return
+                    return False
 
                 self.delete_selected()
             case " ":
                 if not self.selected_file:
-                    return
+                    return False
 
                 self.open_selected()
             case "-":
                 self.dir_up()
-                    
+            case "G":
+                self.selected_index = max(len(self.files) - 1, 0)
+                self.update()
+            case _:
+                return False
+        
+        return True
+
+    def buffer_input(self) -> bool:
+        ib = self.input_buffer
+
+        if ib.endswith("gg"):
+            self.selected_index = 0
+            self.update()
+        else:
+            return False 
+         
+        return True
+
+    def input(self, c: str): 
+        found_single = self.single_input(c)
+        
+        if found_single:
+            self.input_buffer = ""
+            return
+
+        self.input_buffer += c
+
+        found_buffer = self.buffer_input()
+
+        if found_buffer:
+            self.input_buffer = ""
+            return
 
     def main_loop(self):
         while True:
@@ -118,10 +152,10 @@ class Explorer:
                 break
 
             if c.isdigit():
-                self.motion_add += int(c)
+                self.motion_mult += int(c)
             else:
                 self.input(c)
-                self.motion_add = 0
+                self.motion_mult = 1
                    
         self.kb.set_normal_term()
 
