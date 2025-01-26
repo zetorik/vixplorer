@@ -8,6 +8,7 @@ import sys
 import time
 
 NO_SELECTED_FILE = ValueError("No selected file found")
+TO_END = 10069993
 
 def clean():
     os.system("clear")
@@ -64,17 +65,15 @@ class Explorer:
         if not self.selected_file:
             raise NO_SELECTED_FILE 
 
-        if self.is_dir_selected:
-            shutil.rmtree(self.selected_file)
-        else:
-            os.remove(self.selected_file)
+        for i in range(abs(self.motion_mult)):
+            if self.is_dir_selected:
+                shutil.rmtree(self.selected_file)
+            else:
+                os.remove(self.selected_file)
 
-        self.update()
+            self.update()
 
-    def open_selected(self):
-        if not self.selected_file:
-            raise NO_SELECTED_FILE
-
+    def single_open_selected(self):
         if self.is_dir_selected:
             self.working_dir = self.selected_file
             self.selected_index = 0
@@ -83,25 +82,44 @@ class Explorer:
                 os.system("vim " + self.selected_file)
             except:
                 os.system("notepad " + self.selected_file)
-        
+
         self.update()
 
+    def open_selected(self):
+        if not self.selected_file:
+            raise NO_SELECTED_FILE
+        
+        times = self.motion_mult
+        breaking = False
+
+        if times == TO_END:
+            while len(os.listdir()) > 0:
+                if not self.is_dir_selected:
+                    breaking = True
+
+                self.single_open_selected()
+                
+                if breaking:
+                    break
+        else:
+            for i in range(abs(times)):
+                self.single_open_selected()
+
     def dir_up(self):
-        for i in range(abs(self.motion_mult)):
-            self.working_dir = os.path.dirname(self.working_dir)
+        times = self.motion_mult
+
+        if times == TO_END:
+            while self.working_dir != os.path.dirname(self.working_dir):
+                self.working_dir = os.path.dirname(self.working_dir)
+        else:
+            for i in range(abs(times)):
+                self.working_dir = os.path.dirname(self.working_dir)
 
         self.selected_index = 0
         self.update()
 
     def single_input(self, c: str) -> bool:
         match c:
-            case " ":
-                if not self.selected_file:
-                    return False
-
-                self.open_selected()
-            case "-":
-                self.dir_up()           
             case _:
                 return False
 
@@ -110,6 +128,13 @@ class Explorer:
     
     def operator_input(self, o: str):
         match o:
+            case "-":
+                self.dir_up()
+            case " ":
+                if not self.selected_file:
+                    return False
+                
+                self.open_selected()
             case "d":
                 if not self.selected_file:
                     return False
@@ -124,15 +149,20 @@ class Explorer:
     def buffer_input(self) -> bool:
         ib = self.input_buffer
 
-        operators = ("dd")
-        motions = ("gg", "j", "k", "G")
+        operators = ("dd", "--", "  ")
+        motions = ("gg", "j", "k", "G", "t")
         found_buffer = False
 
         for motion in motions:
-            if not ib.endswith(motion):
+            if not ib.endswith(motion) or len(ib) < len(motion):
                 continue
             
             found_buffer = True
+
+            operator = ib.removesuffix(motion)
+
+            if len(operator) != 0:
+                operator = ib.removesuffix(motion)[-1]
 
             match motion:
                 case "gg":
@@ -143,11 +173,8 @@ class Explorer:
                     pass
                 case "k":
                     self.motion_mult *= -1
-
-            operator = ib.removesuffix(motion)
-
-            if len(operator) != 0:
-                operator = ib.removesuffix(motion)[-1]
+                case "t":
+                    self.motion_mult = TO_END
 
             self.operator_input(operator)
 
@@ -155,14 +182,18 @@ class Explorer:
 
         if not found_buffer:
             for operator in operators:
-                if not ib.endswith(operator):
+                if not ib.endswith(operator) or len(ib) < len(operator):
                     continue
 
                 found_buffer = True
 
                 match operator:
                     case "dd":
-                        self.delete_selected()
+                        self.operator_input("d")
+                    case "--":
+                        self.operator_input("-")
+                    case "  ":
+                        self.operator_input(" ")
 
                 break
 
@@ -201,7 +232,10 @@ class Explorer:
                 else:
                     self.motion_mult = self.motion_mult * 10 + int(c)
             else:
-                self.input(c)
+                try:
+                    self.input(c)
+                except:
+                    pass
             
             self.prev_c = c
                    
