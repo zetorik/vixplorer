@@ -37,3 +37,7 @@ t - to the end (used with either "-" or " ")
 ## Commands
 :w - write changes
 :d - discrad changes
+
+# Dependencies
+vim in PATH
+colorama python module
